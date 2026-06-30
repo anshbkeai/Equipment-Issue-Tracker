@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logbook — Engineering Journal</title>
+<style>
+  :root{
+    --bg: #0c0d10;
+    --bg-elevated: #16171b;
+    --bg-card: #191a1f;
+    --bg-card-hover: #1e1f25;
+    --border: #2a2b32;
+    --border-soft: #222329;
+    --text: #e7e6e3;
+    --text-dim: #9b9a96;
+    --text-faint: #67666f;
+    --accent: #d98c4a;
+    --accent-soft: rgba(217,140,74,0.14);
+    --accent-text: #f0b27e;
+    --green: #7fb88a;
+    --red: #d97070;
+    --blue: #7aa3c9;
+    --purple: #b394d6;
+    --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin:0; padding:0; height:100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--accent-text); }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2c2d34; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #383942; }
+
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea, select { font-family: inherit; color: var(--text); }
+
+  /* ===== Layout ===== */
+  .app {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    background: var(--bg-elevated);
+    border-right: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .brand {
+    padding: 18px 18px 14px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .brand-mark {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, var(--accent), #b56a30);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 12px;
+    color: #1a1107;
+    flex-shrink:0;
+  }
+  .brand-name { font-weight: 600; font-size: 14.5px; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 10.5px; color: var(--text-faint); font-family: var(--mono); margin-left: auto; }
+
+  .sidebar-section { padding: 14px 14px 0; }
+
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px 8px 30px;
+    font-size: 12.5px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); opacity:.45; width:13px; height:13px; }
+
+  .new-entry-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--accent);
+    color: #1a1107;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-weight: 600;
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: filter .15s, transform .1s;
+  }
+  .new-entry-btn:hover { filter: brightness(1.08); }
+  .new-entry-btn:active { transform: scale(0.98); }
+
+  .sidebar-nav { flex: 1; overflow-y: auto; padding-bottom: 14px; margin-top: 6px; }
+
+  .nav-group { padding: 14px 14px 0; }
+  .nav-group-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 7px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+
+  .nav-item {
+    display:flex; align-items:center; gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background .12s, color .12s;
+    user-select: none;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+  }
+  .nav-item:hover { background: var(--bg-card-hover); color: var(--text); }
+  .nav-item.active { background: var(--accent-soft); color: var(--accent-text); }
+  .nav-item .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+    flex-shrink:0;
+  }
+  .nav-item.active .count { color: var(--accent-text); opacity:.8; }
+  .nav-item .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+  .tag-cloud { display:flex; flex-wrap:wrap; gap:5px; margin-top: 4px; }
+  .tag-pill {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 3px 7px;
+    border-radius: 100px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .tag-pill:hover { border-color: var(--accent); color: var(--accent-text); }
+  .tag-pill.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+
+  .timeline-list { display:flex; flex-direction:column; gap: 2px; }
+  .timeline-day { margin-top: 8px; }
+  .timeline-day-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    padding: 4px 8px;
+  }
+  .timeline-entry {
+    display:flex; gap:8px; align-items:flex-start;
+    padding: 5px 8px;
+    border-radius: var(--radius-sm);
+    cursor:pointer;
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+  .timeline-entry:hover { background: var(--bg-card-hover); color: var(--text); }
+  .timeline-entry .t-time { font-family: var(--mono); font-size: 10px; color: var(--text-faint); flex-shrink:0; padding-top:1px; }
+  .timeline-entry .t-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .sidebar-footer {
+    border-top: 1px solid var(--border-soft);
+    padding: 10px 14px;
+    display:flex; gap: 6px;
+  }
+  .footer-btn {
+    flex:1;
+    background: var(--bg-card);
+    border:1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: var(--radius-sm);
+    padding: 7px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+    transition: all .12s;
+  }
+  .footer-btn:hover { color: var(--text); border-color: #3a3b44; }
+  #importInput { display:none; }
+
+  /* ===== Main ===== */
+  .main {
+    overflow-y: auto;
+    padding: 0 0 60px;
+  }
+
+  .topbar {
+    position: sticky; top:0; z-index: 5;
+    background: rgba(12,13,16,0.88);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 16px 32px;
+  }
+  .topbar-title { font-size: 19px; font-weight: 650; letter-spacing:-0.015em; }
+  .topbar-sub { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    padding: 20px 32px 4px;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 12px 13px;
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .stat-value.accent { color: var(--accent-text); }
+  .stat-label {
+    font-size: 10.5px;
+    color: var(--text-faint);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top:3px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+
+  .entries-wrap { padding: 22px 32px 0; max-width: 920px; }
+
+  .empty-state {
+    text-align:center;
+    padding: 70px 20px;
+    color: var(--text-faint);
+  }
+  .empty-state .glyph { font-size: 30px; margin-bottom: 10px; opacity:.6; font-family: var(--mono); }
+  .empty-state h3 { color: var(--text-dim); font-weight: 600; font-size: 15px; margin: 0 0 6px; }
+  .empty-state p { font-size: 12.5px; max-width: 320px; margin: 0 auto; line-height:1.5; }
+
+  /* ===== Entry Card ===== */
+  .entry-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .entry-card:hover { border-color: #34353d; }
+
+  .entry-header {
+    display:flex; align-items:flex-start; gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+  .entry-type-badge {
+    flex-shrink:0;
+    width: 30px; height:30px;
+    border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 14px;
+    margin-top: 1px;
+  }
+  .entry-main { flex:1; min-width:0; }
+  .entry-top-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .entry-title { font-size: 14.5px; font-weight: 600; letter-spacing:-0.005em; }
+  .entry-project {
+    font-family: var(--mono); font-size: 10.5px; color: var(--accent-text);
+    background: var(--accent-soft); padding: 1.5px 7px; border-radius: 100px;
+  }
+  .entry-priority { font-size: 10.5px; padding: 1.5px 7px; border-radius:100px; font-weight:600; }
+  .prio-high { background: rgba(217,112,112,0.15); color: var(--red); }
+  .prio-medium { background: rgba(217,140,74,0.15); color: var(--accent-text); }
+  .prio-low { background: rgba(122,163,201,0.15); color: var(--blue); }
+
+  .entry-meta-row {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    display:flex; align-items:center; gap: 10px;
+  }
+  .entry-snippet {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .entry-tags-row { margin-top: 8px; display:flex; flex-wrap:wrap; gap:5px; }
+
+  .entry-actions { display:flex; align-items:center; gap: 4px; flex-shrink:0; }
+  .icon-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none; background: transparent;
+    color: var(--text-faint);
+    display:flex; align-items:center; justify-content:center;
+    transition: all .12s;
+  }
+  .icon-btn:hover { background: var(--bg-card-hover); color: var(--text); }
+  .icon-btn.star.active { color: var(--accent); }
+  .icon-btn.danger:hover { color: var(--red); }
+
+  .chevron { transition: transform .2s; color: var(--text-faint); flex-shrink:0; margin-top:6px; }
+  .entry-card.expanded .chevron { transform: rotate(90deg); }
+
+  .entry-body {
+    display: none;
+    padding: 0 16px 18px 58px;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 2px;
+  }
+  .entry-card.expanded .entry-body { display: block; padding-top: 14px; }
+
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+  .field-full { grid-column: 1 / -1; }
+  .field {
+    margin-bottom: 0;
+  }
+  .field-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--text-faint); font-weight: 600; margin-bottom: 5px;
+    display:flex; align-items:center; gap:5px;
+  }
+  .field-text {
+    font-size: 13px; line-height: 1.55; color: var(--text);
+    white-space: pre-wrap;
+  }
+  .field-text.empty { color: var(--text-faint); font-style: italic; }
+  .field-block {
+    margin-bottom: 14px;
+  }
+
+  .arch-snapshot, .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    white-space: pre-wrap;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .code-lang {
+    font-family: var(--mono); font-size: 10px; color: var(--text-faint);
+    margin-bottom: 4px; text-transform: uppercase; letter-spacing:.05em;
+  }
+  .files-list { display:flex; flex-wrap:wrap; gap: 6px; }
+  .file-chip {
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    background: var(--bg); border:1px solid var(--border); border-radius:5px;
+    padding: 3px 8px;
+  }
+
+  .tag-chip {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--text-dim);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 2.5px 8px;
+    border-radius: 100px;
+    cursor:pointer;
+    transition: all .12s;
+  }
+  .tag-chip:hover { border-color: var(--accent); color: var(--accent-text); }
+
+  /* ===== Modal / Editor ===== */
+  .overlay {
+    display:none;
+    position: fixed; inset:0;
+    background: rgba(5,5,7,0.6);
+    backdrop-filter: blur(3px);
+    z-index: 50;
+    align-items: flex-start;
+    justify-content:center;
+    padding: 30px 20px;
+    overflow-y:auto;
+  }
+  .overlay.open { display:flex; animation: fadeIn .15s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .editor {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 760px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp .18s ease;
+  }
+  @keyframes slideUp { from{ transform: translateY(10px); opacity:0 } to{ transform: translateY(0); opacity:1 } }
+
+  .editor-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .editor-header-title { font-size: 15px; font-weight: 650; }
+  .autosave-indicator {
+    font-size: 10.5px; color: var(--text-faint); font-family: var(--mono);
+    display:flex; align-items:center; gap:5px;
+  }
+  .autosave-indicator .dot { width:5px; height:5px; border-radius:50%; background: var(--green); transition: opacity .3s; }
+
+  .editor-body { padding: 18px 22px; max-height: 70vh; overflow-y:auto; }
+
+  .efield { margin-bottom: 16px; }
+  .efield label {
+    display:block; font-size: 10.5px; text-transform: uppercase; letter-spacing:.07em;
+    color: var(--text-faint); font-weight: 600; margin-bottom: 6px;
+  }
+  .efield input[type=text], .efield input[type=number], .efield select, .efield textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 11px;
+    font-size: 13px;
+    outline: none;
+    resize: vertical;
+    transition: border-color .15s;
+    line-height:1.5;
+  }
+  .efield input:focus, .efield select:focus, .efield textarea:focus { border-color: var(--accent); }
+  .efield textarea { min-height: 64px; font-family: var(--sans); }
+  .efield textarea.code { font-family: var(--mono); font-size: 12px; }
+  .efield-row { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .efield-row3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  .section-divider {
+    font-size: 10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color: var(--accent-text);
+    margin: 20px 0 12px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .section-divider:first-child { margin-top:0; padding-top:0; border-top:none; }
+
+  .mood-row { display:flex; gap: 6px; }
+  .mood-opt {
+    flex:1; padding: 9px 6px; text-align:center;
+    background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 18px; transition: all .12s;
+  }
+  .mood-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+
+  .tags-input-wrap {
+    display:flex; flex-wrap:wrap; gap:6px; align-items:center;
+    background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 7px 9px;
+  }
+  .tags-input-wrap input {
+    border:none; background:transparent; outline:none; flex:1; min-width:100px; font-size:12.5px; padding:3px;
+  }
+  .tag-editable {
+    font-family: var(--mono); font-size: 11px; background: var(--accent-soft); color: var(--accent-text);
+    padding: 3px 6px 3px 8px; border-radius: 100px; display:flex; align-items:center; gap:5px;
+  }
+  .tag-editable button { background:none; border:none; color: var(--accent-text); opacity:.6; font-size:13px; line-height:1; padding:0; }
+  .tag-editable button:hover { opacity:1; }
+
+  .editor-footer {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 22px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .btn {
+    border:none; border-radius: var(--radius-sm); padding: 9px 16px; font-size:12.5px; font-weight:600;
+    transition: all .12s;
+  }
+  .btn-primary { background: var(--accent); color: #1a1107; }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: #3a3b44; }
+  .btn-danger-text { background:none; border:none; color: var(--text-faint); font-size:12px; }
+  .btn-danger-text:hover { color: var(--red); }
+
+  .type-select-row { display:flex; flex-wrap:wrap; gap: 6px; }
+  .type-opt {
+    font-size: 11.5px; padding: 6px 11px; border-radius: 100px;
+    background: var(--bg-card); border:1px solid var(--border); color: var(--text-dim);
+  }
+  .type-opt.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); }
+
+  /* scrollbar inside modal body */
+  .editor-body::-webkit-scrollbar-thumb { background: #2c2d34; }
+
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 18px; border-radius: 100px;
+    font-size: 12.5px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    opacity: 0; pointer-events:none; transition: all .25s ease;
+    z-index: 100; display:flex; align-items:center; gap:8px;
+  }
+  .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display:none; }
+    .dashboard { grid-template-columns: repeat(3,1fr); }
+    .field-grid, .efield-row, .efield-row3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">{}</div>
+      <div class="brand-name">Logbook</div>
+      <div class="brand-sub" id="entryCountBadge">0</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search entries, tags, code…">
+      </div>
+      <button class="new-entry-btn" id="newEntryBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Entry
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-title">Views</div>
+        <div class="nav-item active" data-view="all"><span>All Entries</span><span class="count" id="cnt-all">0</span></div>
+        <div class="nav-item" data-view="favorites"><span>⭐ Favorites</span><span class="count" id="cnt-fav">0</span></div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Project</div>
+        <div id="projectList"></div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Entry Type</div>
+        <div id="typeList"></div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">Tags</div>
+        <div class="tag-cloud" id="tagCloud"></div>
+      </div>
+
+      <div class="nav-group" style="padding-bottom:14px;">
+        <div class="nav-group-title">Timeline</div>
+        <div class="timeline-list" id="timelineList"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="footer-btn" id="exportBtn">↓ Export</button>
+      <button class="footer-btn" id="importBtn">↑ Import</button>
+      <input type="file" id="importInput" accept="application/json">
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="viewTitle">All Entries</div>
+      <div class="topbar-sub" id="viewSub">Your engineering thought process, captured over time.</div>
+    </div>
+
+    <div class="dashboard" id="dashboard"></div>
+
+    <div class="entries-wrap" id="entriesWrap"></div>
+  </main>
+</div>
+
+<!-- EDITOR MODAL -->
+<div class="overlay" id="overlay">
+  <div class="editor">
+    <div class="editor-header">
+      <div class="editor-header-title" id="editorTitle">New Entry</div>
+      <div class="autosave-indicator" id="autosaveIndicator"><span class="dot"></span><span id="autosaveText">Draft saved</span></div>
+    </div>
+
+    <div class="editor-body" id="editorBody">
+
+      <div class="section-divider">Overview</div>
+      <div class="efield-row">
+        <div class="efield">
+          <label>Title</label>
+          <input type="text" id="f_title" placeholder="e.g. JWT Authentication">
+        </div>
+        <div class="efield">
+          <label>Project</label>
+          <input type="text" id="f_project" placeholder="e.g. Access-Vault" list="projectSuggestions">
+          <datalist id="projectSuggestions"></datalist>
+        </div>
+      </div>
+      <div class="efield">
+        <label>Entry Type</label>
+        <div class="type-select-row" id="typeSelectRow"></div>
+      </div>
+      <div class="efield">
+        <label>Current Goal</label>
+        <input type="text" id="f_goal" placeholder="What are you trying to achieve right now?">
+      </div>
+
+      <div class="section-divider">Thinking</div>
+      <div class="efield">
+        <label>Problem</label>
+        <textarea id="f_problem" placeholder="What problem are you facing?"></textarea>
+      </div>
+      <div class="efield">
+        <label>Question</label>
+        <textarea id="f_question" placeholder="What question are you trying to answer?"></textarea>
+      </div>
+      <div class="efield">
+        <label>Thought Process</label>
+        <textarea id="f_thoughtProcess" placeholder="Walk through your reasoning…" style="min-height:100px"></textarea>
+      </div>
+      <div class="efield">
+        <label>Research</label>
+        <textarea id="f_research" placeholder="What did you read, test, or look into?"></textarea>
+      </div>
+      <div class="efield">
+        <label>Alternatives Considered</label>
+        <textarea id="f_alternatives" placeholder="One per line…"></textarea>
+      </div>
+      <div class="efield-row">
+        <div class="efield">
+          <label>Decision Taken</label>
+          <textarea id="f_decision" placeholder="What did you decide?"></textarea>
+        </div>
+        <div class="efield">
+          <label>Reason</label>
+          <textarea id="f_reason" placeholder="Why?"></textarea>
+        </div>
+      </div>
+
+      <div class="section-divider">Architecture & Code</div>
+      <div class="efield">
+        <label>Architecture Snapshot</label>
+        <textarea id="f_architecture" class="code" placeholder="Browser&#10;  ↓&#10;JWT Cookie&#10;  ↓&#10;Filter → Controller → Service → Repository → DB"></textarea>
+      </div>
+      <div class="efield-row">
+        <div class="efield">
+          <label>Code Language</label>
+          <input type="text" id="f_codeLang" placeholder="e.g. Java">
+        </div>
+        <div class="efield">
+          <label>Files Modified</label>
+          <input type="text" id="f_files" placeholder="Comma separated: LoginController.java, JwtFilter.java">
+        </div>
+      </div>
+      <div class="efield">
+        <label>Code Snippet</label>
+        <textarea id="f_code" class="code" placeholder="cookie.setHttpOnly(true);" style="min-height:90px"></textarea>
+      </div>
+
+      <div class="section-divider">Bugs & Learning</div>
+      <div class="efield-row">
+        <div class="efield">
+          <label>Bug Found</label>
+          <textarea id="f_bug" placeholder="What broke?"></textarea>
+        </div>
+        <div class="efield">
+          <label>Solution</label>
+          <textarea id="f_solution" placeholder="How did you fix it?"></textarea>
+        </div>
+      </div>
+      <div class="efield">
+        <label>Lessons Learned</label>
+        <textarea id="f_lessons" placeholder="What will you remember from this?"></textarea>
+      </div>
+      <div class="efield-row">
+        <div class="efield">
+          <label>Future Improvements</label>
+          <textarea id="f_improvements" placeholder="What could be better later?"></textarea>
+        </div>
+        <div class="efield">
+          <label>Next Step</label>
+          <textarea id="f_nextStep" placeholder="What's immediately next?"></textarea>
+        </div>
+      </div>
+
+      <div class="section-divider">Meta</div>
+      <div class="efield">
+        <label>Tags</label>
+        <div class="tags-input-wrap" id="tagsInputWrap">
+          <input type="text" id="f_tagInput" placeholder="Type a tag and press Enter…">
+        </div>
+      </div>
+      <div class="efield-row3">
+        <div class="efield">
+          <label>Priority</label>
+          <select id="f_priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="efield">
+          <label>Estimated Time Spent</label>
+          <input type="text" id="f_timeSpent" placeholder="e.g. 45m, 2h">
+        </div>
+        <div class="efield">
+          <label>Mood</label>
+          <div class="mood-row" id="moodRow">
+            <div class="mood-opt" data-mood="🔥">🔥</div>
+            <div class="mood-opt" data-mood="🙂">🙂</div>
+            <div class="mood-opt" data-mood="😐">😐</div>
+            <div class="mood-opt" data-mood="😤">😤</div>
+            <div class="mood-opt" data-mood="🧠">🧠</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="editor-footer">
+      <button class="btn-danger-text" id="deleteEntryBtn" style="visibility:hidden;">Delete entry</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-ghost" id="cancelEditBtn">Close</button>
+        <button class="btn btn-primary" id="saveEditBtn">Save Entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const STORAGE_KEY = "logbook_entries_v1";
+  const DRAFT_KEY = "logbook_draft_v1";
+
+  const ENTRY_TYPES = {
+    "Architecture": {icon:"◆", color:"#7aa3c9"},
+    "Research": {icon:"⌕", color:"#b394d6"},
+    "Decision": {icon:"⚖", color:"#d98c4a"},
+    "Bug": {icon:"✕", color:"#d97070"},
+    "Feature": {icon:"✦", color:"#7fb88a"},
+    "Refactor": {icon:"⟳", color:"#7aa3c9"},
+    "Security": {icon:"⛨", color:"#d97070"},
+    "Database": {icon:"▤", color:"#b394d6"},
+    "API": {icon:"⇄", color:"#7fb88a"},
+    "Deployment": {icon:"▲", color:"#d98c4a"},
+    "Testing": {icon:"✓", color:"#7fb88a"},
+    "Learning": {icon:"☆", color:"#f0b27e"},
+    "Notes": {icon:"✎", color:"#9b9a96"}
+  };
+
+  let state = {
+    entries: [],
+    view: "all",          // all | favorites | project:<name> | type:<name>
+    activeTag: null,
+    searchQuery: "",
+    expandedIds: new Set(),
+    editingId: null,
+    draftTags: []
+  };
+
+  // ---------- Persistence ----------
+  function loadEntries(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      state.entries = raw ? JSON.parse(raw) : seedExample();
+    } catch(e){ state.entries = []; }
+    if(!localStorage.getItem(STORAGE_KEY)) persist();
+  }
+  function persist(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries));
+  }
+  function seedExample(){
+    const now = Date.now();
+    return [{
+      id: "seed1",
+      createdAt: now,
+      title: "JWT Authentication",
+      project: "Access-Vault",
+      type: "Security",
+      goal: "Implement stateless authentication",
+      problem: "Need users to remain authenticated across requests.",
+      question: "Should I use HttpSession or JWT?",
+      thoughtProcess: "Initially wanted HttpSession since it's built into Servlets. But the app needs to be stateless and scalable, so JWT seems more appropriate.",
+      research: "Compared session affinity vs token-based auth for horizontal scaling.",
+      alternatives: "HttpSession\nLocalStorage\nJWT Cookie",
+      decision: "Use JWT stored inside an HttpOnly Cookie.",
+      reason: "Improved security and stateless architecture.",
+      architecture: "Browser\n  ↓\nJWT Cookie\n  ↓\nAuthentication Filter\n  ↓\nController\n  ↓\nService\n  ↓\nRepository\n  ↓\nDatabase",
+      codeLang: "Java",
+      code: 'cookie.setHttpOnly(true);\ncookie.setPath("/");',
+      files: "LoginController.java, JwtFilter.java, JwtUtil.java",
+      bug: "Cookie was not reaching the filter.",
+      solution: 'Set cookie path to "/".',
+      lessons: "Servlet Filters execute before Controllers.",
+      improvements: "Add refresh token rotation.",
+      nextStep: "Implement role-based authorization.",
+      tags: ["jwt","filter","servlet","cookie","security"],
+      priority: "high",
+      mood: "🧠",
+      timeSpent: "1h 20m",
+      favorite: true
+    }];
+  }
+
+  // ---------- Helpers ----------
+  function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function fmtDay(ts){
+    return new Date(ts).toLocaleDateString(undefined, {day:'numeric', month:'long', year:'numeric'});
+  }
+  function fmtTime(ts){
+    return new Date(ts).toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit', hour12:false});
+  }
+  function escapeHtml(str){
+    if(str==null) return "";
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  // ---------- Derived data ----------
+  function getProjects(){
+    const map = {};
+    state.entries.forEach(e => { map[e.project] = (map[e.project]||0) + 1; });
+    return map;
+  }
+  function getTypesUsed(){
+    const map = {};
+    state.entries.forEach(e => { map[e.type] = (map[e.type]||0) + 1; });
+    return map;
+  }
+  function getTagCounts(){
+    const map = {};
+    state.entries.forEach(e => (e.tags||[]).forEach(t => { map[t] = (map[t]||0)+1; }));
+    return map;
+  }
+
+  function filteredEntries(){
+    let list = state.entries.slice().sort((a,b)=> b.createdAt - a.createdAt);
+
+    if(state.view === "favorites"){
+      list = list.filter(e => e.favorite);
+    } else if(state.view.startsWith("project:")){
+      const p = state.view.slice(8);
+      list = list.filter(e => e.project === p);
+    } else if(state.view.startsWith("type:")){
+      const t = state.view.slice(5);
+      list = list.filter(e => e.type === t);
+    }
+
+    if(state.activeTag){
+      list = list.filter(e => (e.tags||[]).includes(state.activeTag));
+    }
+
+    if(state.searchQuery.trim()){
+      const q = state.searchQuery.trim().toLowerCase();
+      list = list.filter(e => {
+        const haystack = [e.title, e.problem, e.decision, e.research, e.lessons, e.code, (e.tags||[]).join(" ")]
+          .join(" ").toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    return list;
+  }
+
+  // ---------- Rendering: Sidebar ----------
+  function renderSidebar(){
+    const projects = getProjects();
+    const projectList = document.getElementById('projectList');
+    projectList.innerHTML = Object.keys(projects).sort().map(p => `
+      <div class="nav-item ${state.view==='project:'+p ? 'active':''}" data-view="project:${escapeHtml(p)}">
+        <span class="dot" style="background:var(--blue)"></span>
+        <span>${escapeHtml(p)}</span>
+        <span class="count">${projects[p]}</span>
+      </div>
+    `).join("") || `<div style="font-size:11.5px;color:var(--text-faint);padding:4px 8px;">No projects yet</div>`;
+
+    const typesUsed = getTypesUsed();
+    const typeList = document.getElementById('typeList');
+    typeList.innerHTML = Object.keys(typesUsed).sort().map(t => `
+      <div class="nav-item ${state.view==='type:'+t ? 'active':''}" data-view="type:${escapeHtml(t)}">
+        <span class="dot" style="background:${ENTRY_TYPES[t]?.color||'#888'}"></span>
+        <span>${ENTRY_TYPES[t]?.icon||''} ${escapeHtml(t)}</span>
+        <span class="count">${typesUsed[t]}</span>
+      </div>
+    `).join("") || `<div style="font-size:11.5px;color:var(--text-faint);padding:4px 8px;">No entries yet</div>`;
+
+    const tagCounts = getTagCounts();
+    const tagCloud = document.getElementById('tagCloud');
+    const sortedTags = Object.keys(tagCounts).sort((a,b)=> tagCounts[b]-tagCounts[a]);
+    tagCloud.innerHTML = sortedTags.map(t => `
+      <div class="tag-pill ${state.activeTag===t?'active':''}" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</div>
+    `).join("") || `<div style="font-size:11.5px;color:var(--text-faint);">No tags yet</div>`;
+
+    // timeline grouped by day
+    const byDay = {};
+    state.entries.slice().sort((a,b)=> b.createdAt - a.createdAt).forEach(e => {
+      const dayKey = fmtDay(e.createdAt);
+      (byDay[dayKey] = byDay[dayKey] || []).push(e);
+    });
+    const timelineList = document.getElementById('timelineList');
+    timelineList.innerHTML = Object.keys(byDay).map(day => `
+      <div class="timeline-day">
+        <div class="timeline-day-label">${day}</div>
+        ${byDay[day].map(e => `
+          <div class="timeline-entry" data-jump="${e.id}">
+            <span class="t-time">${fmtTime(e.createdAt)}</span>
+            <span class="t-title">${escapeHtml(e.title || "Untitled")}</span>
+          </div>
+        `).join("")}
+      </div>
+    `).join("") || `<div style="font-size:11.5px;color:var(--text-faint);padding:6px 8px;">No activity yet</div>`;
+
+    document.getElementById('cnt-all').textContent = state.entries.length;
+    document.getElementById('cnt-fav').textContent = state.entries.filter(e=>e.favorite).length;
+    document.getElementById('entryCountBadge').textContent = state.entries.length;
+
+    document.querySelectorAll('.nav-item[data-view]').forEach(el => {
+      el.classList.toggle('active', el.dataset.view === state.view);
+    });
+  }
+
+  // ---------- Rendering: Dashboard ----------
+  function renderDashboard(){
+    const e = state.entries;
+    const bugs = e.filter(x => x.type === "Bug" && (x.solution||"").trim()).length;
+    const research = e.filter(x => x.type === "Research").length;
+    const arch = e.filter(x => x.type === "Architecture" || x.type === "Decision").length;
+    const tagCounts = getTagCounts();
+    const topTag = Object.keys(tagCounts).sort((a,b)=>tagCounts[b]-tagCounts[a])[0];
+    const lastActivity = e.length ? e.slice().sort((a,b)=>b.createdAt-a.createdAt)[0] : null;
+    const projects = getProjects();
+    const currentProject = lastActivity ? lastActivity.project : "—";
+
+    const stats = [
+      {label:"Total Entries", value:e.length, accent:true},
+      {label:"Architecture / Decisions", value:arch},
+      {label:"Bugs Solved", value:bugs},
+      {label:"Research Sessions", value:research},
+      {label:"Current Project", value: currentProject || "—", small:true},
+      {label:"Last Activity", value: lastActivity ? fmtTime(lastActivity.createdAt) : "—", sub: lastActivity ? fmtDay(lastActivity.createdAt) : ""},
+      {label:"Most Used Tag", value: topTag ? "#"+topTag : "—", small:true}
+    ];
+
+    document.getElementById('dashboard').innerHTML = stats.map(s => `
+      <div class="stat-card">
+        <div class="stat-value ${s.accent?'accent':''}" style="${s.small?'font-size:14px':''}">${escapeHtml(String(s.value))}</div>
+        <div class="stat-label">${s.label}</div>
+        ${s.sub ? `<div class="stat-sub">${escapeHtml(s.sub)}</div>` : ''}
+      </div>
+    `).join("");
+  }
+
+  // ---------- Rendering: Entries ----------
+  function fieldBlock(label, value, mono){
+    const has = value && String(value).trim().length;
+    return `
+      <div class="field-block">
+        <div class="field-label">${label}</div>
+        <div class="field-text ${has?'':'empty'} ${mono?'':''}" style="${mono?'font-family:var(--mono);font-size:12px;':''}">${has?escapeHtml(value):'Not recorded'}</div>
+      </div>`;
+  }
+
+  function renderEntryCard(e){
+    const typeInfo = ENTRY_TYPES[e.type] || {icon:"●", color:"#888"};
+    const expanded = state.expandedIds.has(e.id);
+    const tags = (e.tags||[]).map(t => `<span class="tag-chip" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}</span>`).join("");
+    const files = (e.files||"").split(",").map(f=>f.trim()).filter(Boolean);
+
+    return `
+    <div class="entry-card ${expanded?'expanded':''}" data-id="${e.id}">
+      <div class="entry-header" data-toggle="${e.id}">
+        <div class="entry-type-badge" style="background:${typeInfo.color}22; color:${typeInfo.color};">${typeInfo.icon}</div>
+        <div class="entry-main">
+          <div class="entry-top-row">
+            <span class="entry-title">${escapeHtml(e.title || "Untitled entry")}</span>
+            <span class="entry-project">${escapeHtml(e.project || "—")}</span>
+            <span class="entry-priority prio-${e.priority||'medium'}">${(e.priority||'medium').toUpperCase()}</span>
+            ${e.mood ? `<span title="mood">${e.mood}</span>` : ''}
+          </div>
+          <div class="entry-meta-row">
+            <span>${typeInfo.icon} ${escapeHtml(e.type||'Notes')}</span>
+            <span>·</span>
+            <span>${fmtDay(e.createdAt)}, ${fmtTime(e.createdAt)}</span>
+            ${e.timeSpent ? `<span>·</span><span>⏱ ${escapeHtml(e.timeSpent)}</span>` : ''}
+          </div>
+          ${e.problem ? `<div class="entry-snippet">${escapeHtml(e.problem)}</div>` : (e.decision ? `<div class="entry-snippet">${escapeHtml(e.decision)}</div>` : '')}
+          ${tags ? `<div class="entry-tags-row">${tags}</div>` : ''}
+        </div>
+        <div class="entry-actions">
+          <button class="icon-btn star ${e.favorite?'active':''}" data-star="${e.id}" title="Favorite">${e.favorite ? '★' : '☆'}</button>
+          <button class="icon-btn" data-edit="${e.id}" title="Edit">✎</button>
+          <button class="icon-btn danger" data-delete="${e.id}" title="Delete">🗑</button>
+        </div>
+        <div class="chevron">▸</div>
+      </div>
+
+      <div class="entry-body">
+        <div class="field-block">${e.goal ? `<div class="field-label">Current Goal</div><div class="field-text">${escapeHtml(e.goal)}</div>` : ''}</div>
+
+        <div class="field-grid">
+          ${fieldBlock("Problem", e.problem)}
+          ${fieldBlock("Question", e.question)}
+        </div>
+        ${e.thoughtProcess ? `<div class="field-block" style="margin-top:14px;">${fieldBlock("Thought Process", e.thoughtProcess)}</div>` : ''}
+        <div class="field-grid" style="margin-top:14px;">
+          ${fieldBlock("Research", e.research)}
+          ${fieldBlock("Alternatives Considered", e.alternatives)}
+        </div>
+        <div class="field-grid" style="margin-top:14px;">
+          ${fieldBlock("Decision Taken", e.decision)}
+          ${fieldBlock("Reason", e.reason)}
+        </div>
+
+        ${e.architecture ? `
+        <div class="field-block" style="margin-top:14px;">
+          <div class="field-label">Architecture Snapshot</div>
+          <div class="arch-snapshot">${escapeHtml(e.architecture)}</div>
+        </div>` : ''}
+
+        ${e.code ? `
+        <div class="field-block" style="margin-top:14px;">
+          <div class="field-label">Code Snippet</div>
+          <div class="code-lang">${escapeHtml(e.codeLang || 'code')}</div>
+          <div class="code-block">${escapeHtml(e.code)}</div>
+        </div>` : ''}
+
+        ${files.length ? `
+        <div class="field-block" style="margin-top:14px;">
+          <div class="field-label">Files Modified</div>
+          <div class="files-list">${files.map(f=>`<span class="file-chip">${escapeHtml(f)}</span>`).join("")}</div>
+        </div>` : ''}
+
+        <div class="field-grid" style="margin-top:14px;">
+          ${fieldBlock("Bug Found", e.bug)}
+          ${fieldBlock("Solution", e.solution)}
+        </div>
+        ${e.lessons ? `<div class="field-block" style="margin-top:14px;">${fieldBlock("Lessons Learned", e.lessons)}</div>` : ''}
+        <div class="field-grid" style="margin-top:14px;">
+          ${fieldBlock("Future Improvements", e.improvements)}
+          ${fieldBlock("Next Step", e.nextStep)}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderEntries(){
+    const list = filteredEntries();
+    const wrap = document.getElementById('entriesWrap');
+
+    let title = "All Entries", sub = "Your engineering thought process, captured over time.";
+    if(state.view === "favorites"){ title = "Favorites"; sub = "Entries you've starred for quick reference."; }
+    else if(state.view.startsWith("project:")){ title = state.view.slice(8); sub = "Filtered by project."; }
+    else if(state.view.startsWith("type:")){ title = state.view.slice(5); sub = "Filtered by entry type."; }
+    if(state.activeTag){ sub += ` Tagged #${state.activeTag}.`; }
+    if(state.searchQuery.trim()){ sub = `Search results for "${state.searchQuery.trim()}"`; }
+
+    document.getElementById('viewTitle').textContent = title;
+    document.getElementById('viewSub').textContent = sub;
+
+    if(!list.length){
+      wrap.innerHTML = `
+        <div class="empty-state">
+          <div class="glyph">{ }</div>
+          <h3>Nothing here yet</h3>
+          <p>No entries match this view. Start a new entry to capture what you're thinking right now.</p>
+        </div>`;
+      return;
+    }
+    wrap.innerHTML = list.map(renderEntryCard).join("");
+  }
+
+  function renderAll(){
+    renderSidebar();
+    renderDashboard();
+    renderEntries();
+  }
+
+  // ---------- Event delegation: main UI ----------
+  document.addEventListener('click', function(ev){
+    const navItem = ev.target.closest('.nav-item[data-view]');
+    if(navItem){
+      state.view = navItem.dataset.view;
+      renderAll();
+      return;
+    }
+    const tagPill = ev.target.closest('.tag-pill[data-tag]');
+    if(tagPill){
+      const t = tagPill.dataset.tag;
+      state.activeTag = (state.activeTag === t) ? null : t;
+      renderAll();
+      return;
+    }
+    const tagChip = ev.target.closest('.tag-chip[data-tag]');
+    if(tagChip){
+      state.activeTag = tagChip.dataset.tag;
+      state.view = "all";
+      renderAll();
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    const jump = ev.target.closest('.timeline-entry[data-jump]');
+    if(jump){
+      const id = jump.dataset.jump;
+      state.expandedIds.add(id);
+      renderAll();
+      setTimeout(()=>{
+        const card = document.querySelector(`.entry-card[data-id="${id}"]`);
+        if(card) card.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 30);
+      return;
+    }
+    const toggle = ev.target.closest('.entry-header[data-toggle]');
+    if(toggle && !ev.target.closest('.entry-actions')){
+      const id = toggle.dataset.toggle;
+      if(state.expandedIds.has(id)) state.expandedIds.delete(id);
+      else state.expandedIds.add(id);
+      renderEntries();
+      return;
+    }
+    const star = ev.target.closest('[data-star]');
+    if(star){
+      const e = state.entries.find(x=>x.id===star.dataset.star);
+      if(e){ e.favorite = !e.favorite; persist(); renderAll(); }
+      return;
+    }
+    const editBtn = ev.target.closest('[data-edit]');
+    if(editBtn){ openEditor(editBtn.dataset.edit); return; }
+
+    const delBtn = ev.target.closest('[data-delete]');
+    if(delBtn){
+      if(confirm("Delete this entry? This can't be undone.")){
+        state.entries = state.entries.filter(x=>x.id!==delBtn.dataset.delete);
+        persist();
+        renderAll();
+        showToast("Entry deleted");
+      }
+      return;
+    }
+  });
+
+  document.getElementById('searchInput').addEventListener('input', function(e){
+    state.searchQuery = e.target.value;
+    renderEntries();
+  });
+
+  // ---------- Export / Import ----------
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    const lines = ["# Engineering Journal Export", `_Exported ${new Date().toLocaleString()}_`, ""];
+    state.entries.slice().sort((a,b)=>b.createdAt-a.createdAt).forEach(e => {
+      lines.push(`## ${e.title || "Untitled"}`);
+      lines.push(`**${fmtDay(e.createdAt)}, ${fmtTime(e.createdAt)}** · ${e.project||""} · ${e.type||""} · Priority: ${e.priority||""} ${e.favorite?"⭐":""}`);
+      lines.push("");
+      const f = (label, val) => { if(val && String(val).trim()) lines.push(`**${label}:** ${val}\n`); };
+      f("Current Goal", e.goal);
+      f("Problem", e.problem);
+      f("Question", e.question);
+      f("Thought Process", e.thoughtProcess);
+      f("Research", e.research);
+      f("Alternatives Considered", e.alternatives);
+      f("Decision Taken", e.decision);
+      f("Reason", e.reason);
+      if(e.architecture && e.architecture.trim()){ lines.push("**Architecture Snapshot:**"); lines.push("```"); lines.push(e.architecture); lines.push("```"); lines.push(""); }
+      if(e.code && e.code.trim()){ lines.push(`**Code Snippet** (${e.codeLang||"code"}):`); lines.push("```"+(e.codeLang||"").toLowerCase()); lines.push(e.code); lines.push("```"); lines.push(""); }
+      f("Files Modified", e.files);
+      f("Bug Found", e.bug);
+      f("Solution", e.solution);
+      f("Lessons Learned", e.lessons);
+      f("Future Improvements", e.improvements);
+      f("Next Step", e.nextStep);
+      if((e.tags||[]).length) lines.push(`**Tags:** ${e.tags.map(t=>"#"+t).join(" ")}`);
+      lines.push("\n---\n");
+    });
+    const blob = new Blob([lines.join("\n")], {type:"text/markdown"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `engineering-journal-${new Date().toISOString().slice(0,10)}.md`;
+    a.click();
+    showToast("Journal exported as Markdown");
+  });
+
+  document.getElementById('importBtn').addEventListener('click', function(){
+    document.getElementById('importInput').click();
+  });
+  document.getElementById('importInput').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      try {
+        const data = JSON.parse(evt.target.result);
+        const incoming = Array.isArray(data) ? data : (data.entries || []);
+        if(!Array.isArray(incoming)) throw new Error("bad format");
+        let added = 0;
+        incoming.forEach(item => {
+          if(!item.id) item.id = uid();
+          if(state.entries.some(x=>x.id===item.id)) item.id = uid();
+          if(!item.createdAt) item.createdAt = Date.now();
+          state.entries.push(item);
+          added++;
+        });
+        persist();
+        renderAll();
+        showToast(`Imported ${added} entr${added===1?'y':'ies'}`);
+      } catch(err){
+        showToast("Import failed — invalid file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  // ---------- Editor ----------
+  const overlay = document.getElementById('overlay');
+  const editorFields = ["title","project","goal","problem","question","thoughtProcess","research",
+    "alternatives","decision","reason","architecture","codeLang","files","code","bug","solution",
+    "lessons","improvements","nextStep","priority","timeSpent"];
+
+  function buildTypeSelectRow(){
+    const row = document.getElementById('typeSelectRow');
+    row.innerHTML = Object.keys(ENTRY_TYPES).map(t =>
+      `<div class="type-opt" data-type="${t}">${ENTRY_TYPES[t].icon} ${t}</div>`
+    ).join("");
+  }
+  buildTypeSelectRow();
+
+  let selectedType = "Notes";
+  let selectedMood = "";
+
+  document.getElementById('typeSelectRow').addEventListener('click', function(e){
+    const opt = e.target.closest('.type-opt');
+    if(!opt) return;
+    selectedType = opt.dataset.type;
+    document.querySelectorAll('.type-opt').forEach(el => el.classList.toggle('selected', el.dataset.type===selectedType));
+    scheduleDraftAutosave();
+  });
+
+  document.getElementById('moodRow').addEventListener('click', function(e){
+    const opt = e.target.closest('.mood-opt');
+    if(!opt) return;
+    selectedMood = (selectedMood === opt.dataset.mood) ? "" : opt.dataset.mood;
+    document.querySelectorAll('.mood-opt').forEach(el => el.classList.toggle('selected', el.dataset.mood===selectedMood && selectedMood!==""));
+    scheduleDraftAutosave();
+  });
+
+  function renderTagsInput(){
+    const wrap = document.getElementById('tagsInputWrap');
+    const input = document.getElementById('f_tagInput');
+    wrap.querySelectorAll('.tag-editable').forEach(el => el.remove());
+    state.draftTags.forEach(t => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-editable';
+      chip.innerHTML = `#${escapeHtml(t)} <button data-removetag="${escapeHtml(t)}">×</button>`;
+      wrap.insertBefore(chip, input);
+    });
+  }
+  document.getElementById('tagsInputWrap').addEventListener('click', function(e){
+    const btn = e.target.closest('[data-removetag]');
+    if(btn){
+      state.draftTags = state.draftTags.filter(t=>t!==btn.dataset.removetag);
+      renderTagsInput();
+      scheduleDraftAutosave();
+    } else {
+      document.getElementById('f_tagInput').focus();
+    }
+  });
+  document.getElementById('f_tagInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ','){
+      e.preventDefault();
+      let val = this.value.trim().replace(/^#/,'').replace(/,$/,'');
+      if(val && !state.draftTags.includes(val)){
+        state.draftTags.push(val);
+        renderTagsInput();
+        scheduleDraftAutosave();
+      }
+      this.value = "";
+    } else if(e.key === 'Backspace' && !this.value && state.draftTags.length){
+      state.draftTags.pop();
+      renderTagsInput();
+      scheduleDraftAutosave();
+    }
+  });
+
+  function fillProjectSuggestions(){
+    const dl = document.getElementById('projectSuggestions');
+    dl.innerHTML = Object.keys(getProjects()).map(p=>`<option value="${escapeHtml(p)}">`).join("");
+  }
+
+  function openEditor(id){
+    fillProjectSuggestions();
+    state.editingId = id || null;
+    const e = id ? state.entries.find(x=>x.id===id) : null;
+
+    document.getElementById('editorTitle').textContent = e ? "Edit Entry" : "New Entry";
+    document.getElementById('deleteEntryBtn').style.visibility = e ? "visible" : "hidden";
+
+    editorFields.forEach(key => {
+      const el = document.getElementById('f_' + key);
+      if(el) el.value = e ? (e[key] || "") : "";
+    });
+
+    selectedType = e ? (e.type || "Notes") : "Notes";
+    document.querySelectorAll('.type-opt').forEach(el => el.classList.toggle('selected', el.dataset.type===selectedType));
+
+    selectedMood = e ? (e.mood || "") : "";
+    document.querySelectorAll('.mood-opt').forEach(el => el.classList.toggle('selected', el.dataset.mood===selectedMood && selectedMood!==""));
+
+    document.getElementById('f_priority').value = e ? (e.priority || "medium") : "medium";
+
+    state.draftTags = e ? (e.tags || []).slice() : [];
+    renderTagsInput();
+
+    overlay.classList.add('open');
+    document.getElementById('autosaveText').textContent = "Draft saved";
+    document.getElementById('editorBody').scrollTop = 0;
+    setTimeout(()=> document.getElementById('f_title').focus(), 50);
+  }
+
+  function closeEditor(){
+    overlay.classList.remove('open');
+    state.editingId = null;
+    localStorage.removeItem(DRAFT_KEY);
+  }
+
+  function collectFormData(){
+    const data = {};
+    editorFields.forEach(key => {
+      const el = document.getElementById('f_' + key);
+      data[key] = el ? el.value : "";
+    });
+    data.type = selectedType;
+    data.mood = selectedMood;
+    data.tags = state.draftTags.slice();
+    return data;
+  }
+
+  function saveEntry(){
+    const data = collectFormData();
+    if(!data.title.trim()){
+      showToast("Give the entry a title first");
+      document.getElementById('f_title').focus();
+      return;
+    }
+    if(state.editingId){
+      const idx = state.entries.findIndex(x=>x.id===state.editingId);
+      if(idx > -1){
+        state.entries[idx] = {...state.entries[idx], ...data};
+      }
+      showToast("Entry updated");
+    } else {
+      const entry = {
+        id: uid(),
+        createdAt: Date.now(),
+        favorite: false,
+        ...data
+      };
+      state.entries.push(entry);
+      showToast("Entry saved");
+    }
+    persist();
+    closeEditor();
+    renderAll();
+  }
+
+  document.getElementById('newEntryBtn').addEventListener('click', ()=> openEditor(null));
+  document.getElementById('cancelEditBtn').addEventListener('click', closeEditor);
+  document.getElementById('saveEditBtn').addEventListener('click', saveEntry);
+  document.getElementById('deleteEntryBtn').addEventListener('click', function(){
+    if(state.editingId && confirm("Delete this entry? This can't be undone.")){
+      state.entries = state.entries.filter(x=>x.id!==state.editingId);
+      persist();
+      closeEditor();
+      renderAll();
+      showToast("Entry deleted");
+    }
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) closeEditor();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && overlay.classList.contains('open')) closeEditor();
+  });
+
+  // Autosave draft (never lose work)
+  let draftTimer = null;
+  function scheduleDraftAutosave(){
+    clearTimeout(draftTimer);
+    const indicator = document.getElementById('autosaveText');
+    indicator.textContent = "Saving…";
+    draftTimer = setTimeout(()=>{
+      const data = collectFormData();
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({editingId: state.editingId, data}));
+      indicator.textContent = "Draft saved · " + new Date().toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    }, 800);
+  }
+  document.getElementById('editorBody').addEventListener('input', scheduleDraftAutosave);
+
+  function restoreDraftOnLoad(){
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if(!raw) return;
+      const draft = JSON.parse(raw);
+      if(!draft || !draft.data) return;
+      const hasContent = Object.values(draft.data).some(v => Array.isArray(v) ? v.length : (v && String(v).trim()));
+      if(!hasContent) return;
+      openEditor(draft.editingId || null);
+      editorFields.forEach(key => {
+        const el = document.getElementById('f_' + key);
+        if(el && draft.data[key] !== undefined) el.value = draft.data[key];
+      });
+      if(draft.data.type){
+        selectedType = draft.data.type;
+        document.querySelectorAll('.type-opt').forEach(el => el.classList.toggle('selected', el.dataset.type===selectedType));
+      }
+      if(draft.data.mood){
+        selectedMood = draft.data.mood;
+        document.querySelectorAll('.mood-opt').forEach(el => el.classList.toggle('selected', el.dataset.mood===selectedMood));
+      }
+      if(draft.data.tags){ state.draftTags = draft.data.tags; renderTagsInput(); }
+      showToast("Restored unsaved draft");
+    } catch(e){ /* ignore */ }
+  }
+
+  // ---------- Init ----------
+  loadEntries();
+  renderAll();
+  restoreDraftOnLoad();
+
+})();
+</script>
+</body>
+</html>
