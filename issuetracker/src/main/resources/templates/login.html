@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet"  href="login.css">
+</head>
+<body>
+    <div class="logo">Contact Manager</div>
+    <nav>
+        <a th:href = "@{/logout}"> Logout</a>
+        <a class="nav-button" th:href="@{/home}">Home</a>
+    </nav>
+    <div class="signup-container">
+        <h1>Please Log In</h1>
+		<div th:if="${param.error}">
+			Invalid username and password.</div>
+		<div th:if="${param.logout}">
+			You have been logged out.</div>
+            <form th:action="@{/login}" method="POST" class="signup-form">
+            <h2>Login</h2>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div class="alternative-login">
+            <p>Or login with:</p>
+            <a th:href="@{'/oauth2/authorization/google'}">
+                <button class="google-btn">Google</button>
+            </a>
+            <a href="/oauth2/authorization/github">
+                <button class="github-btn">GitHub</button>
+            </a>
+        </div>
+        <form action="/logout" method="post">
+            <input type="submit" value="Logout">
+        </form>
+        
+    </div>
+</body>
+</html>

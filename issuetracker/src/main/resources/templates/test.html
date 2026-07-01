@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="corporate">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Home</title>
+
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/daisyui@5/daisyui.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+
+<body class="bg-base-200 min-h-screen">
+
+    <div class="navbar bg-base-100 shadow">
+
+        <div class="flex-1">
+            <a class="btn btn-ghost text-xl">
+                📒 Contact Manager
+            </a>
+        </div>
+
+        <div class="flex-none">
+            <a href="/logout" class="btn btn-error">
+                Logout
+            </a>
+        </div>
+
+    </div>
+
+    <div class="hero min-h-[85vh]">
+
+        <div class="card bg-base-100 shadow-2xl w-96">
+
+            <div class="card-body items-center text-center">
+
+                <div class="avatar placeholder">
+
+                    <div class="bg-primary text-primary-content rounded-full w-20">
+
+                        <span class="text-3xl">
+                            👤
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <h2 class="card-title mt-3">
+                    Welcome
+                </h2>
+
+                <h1 class="text-2xl font-bold text-primary"
+                    th:text="${username}">
+                </h1>
+
+                <p class="text-base-content/70">
+                    Glad to see you again.
+                </p>
+
+                <a href="/logout" class="btn btn-primary mt-4">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

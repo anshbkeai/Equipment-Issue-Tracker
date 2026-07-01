@@ -27,11 +27,13 @@ public class SecurityConfiguration {
         httpSecurity.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> {
-                auth.requestMatchers("/auth/**" , "/test/**").permitAll();
-
+                auth.requestMatchers("/auth/**" , "/test/**" , "/login").permitAll();
+ 
                 auth.anyRequest().authenticated();
             })
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            
+            ;
 
         return httpSecurity.build();
     }

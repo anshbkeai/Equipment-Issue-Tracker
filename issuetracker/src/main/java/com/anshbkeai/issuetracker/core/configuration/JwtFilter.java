@@ -26,13 +26,20 @@ public class JwtFilter extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
-            return;
+        String token = null;
+        if (request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if (cookie.getName().equals("token")) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
         }
-        String token = authHeader.substring(7);
-        if(!jwtService.validate(token)) {
+        if(token == null || token.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return ; 
+        }
+         if(!jwtService.validate(token)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
             return;
         }
@@ -49,7 +56,7 @@ public class JwtFilter extends OncePerRequestFilter{
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/auth") || path.startsWith("/test");    
+        return path.startsWith("/auth") || path.startsWith("/test") || path.contains("login");    
     }
 
 }
