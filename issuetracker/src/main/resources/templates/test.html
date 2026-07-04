@@ -25,12 +25,18 @@
         </div>
 
         <div class="flex-none">
-            <a href="/logout" class="btn btn-error">
-                Logout
-            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-ghost">
+                    Logout
+                </button>
+            </form>
         </div>
 
     </div>
+    <nav>
+        <img th:src="${appUser.profileUrl}" alt="">
+        <span th:text=${appUser.authMode} > </span>
+    </nav>
 
     <div class="hero min-h-[85vh]">
 
@@ -62,9 +68,12 @@
                     Glad to see you again.
                 </p>
 
+
+
                 <a href="/logout" class="btn btn-primary mt-4">
                     Logout
                 </a>
+                 <a href="/dashboard">GO TO DASHBOARD</a>
 
             </div>
 

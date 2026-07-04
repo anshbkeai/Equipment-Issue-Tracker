@@ -40,6 +40,9 @@ public class AppUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AuthMode authMode;
 
+    @Column(nullable = true)
+    private String profileUrl;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(

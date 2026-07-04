@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.anshbkeai.issuetracker.core.model.AppUser;
 import com.anshbkeai.issuetracker.core.repository.AppUserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,14 @@ public class AppUserService implements UserDetailsService {
         // TODO Auto-generated method stub
         return appUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not found"));
     }
+
+    public void saveUser(AppUser appUser) {
+        appUserRepository.save(appUser);
+    }
+
+    public AppUser findByUsername(String username) {
+        return appUserRepository.findByUsername(username).orElse(null);
+    }
+    
 
 }

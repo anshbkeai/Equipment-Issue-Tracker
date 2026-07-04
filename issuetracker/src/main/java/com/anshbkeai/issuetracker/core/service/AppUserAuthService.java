@@ -26,7 +26,7 @@ public class AppUserAuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    public String signup(AuthRequest authRequest) {
+    public String signup(AuthRequest authRequest , AuthMode authMode) {
         var user = appUserRepository.findByUsername(authRequest.username());
         if (user.isPresent()) {
             throw new RuntimeException("User already exists");
@@ -37,7 +37,7 @@ public class AppUserAuthService {
                 .username(authRequest.username())
                 .password(encoder.encode(authRequest.password()))
                 .role(Role.USER)
-                .authMode(AuthMode.EMAIL)
+                .authMode(authMode)
                 .build();
         appUserRepository.save(newUser);
 

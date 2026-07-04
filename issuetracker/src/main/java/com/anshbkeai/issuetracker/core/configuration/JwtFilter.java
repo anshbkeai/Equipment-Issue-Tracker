@@ -1,6 +1,7 @@
 package com.anshbkeai.issuetracker.core.configuration;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,8 +18,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter{
 
     private final JWTService jwtService;
@@ -35,20 +38,21 @@ public class JwtFilter extends OncePerRequestFilter{
                     }
                 }
         }
-        if(token == null || token.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return ; 
+         if (token != null && jwtService.validate(token)) {
+
+            String username = jwtService.extractUsername(token);
+            Role role = jwtService.extractRole(token);
+
+            UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+                );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            log.info("JWT sucessful for {} at  {}" , username , Instant.now() );
         }
-         if(!jwtService.validate(token)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-            return;
-        }
-        String username = jwtService.extractUsername(token);
-        Role role = jwtService.extractRole(token); 
-        
-        UsernamePasswordAuthenticationToken authenticationToken = new
-                                                                    UsernamePasswordAuthenticationToken(username, null ,  List.of(new SimpleGrantedAuthority("ROLE_" + role.name())) );
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
     }
@@ -56,7 +60,8 @@ public class JwtFilter extends OncePerRequestFilter{
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/auth") || path.startsWith("/test") || path.contains("login");    
+        log.info(path);
+        return path.startsWith("/auth") || path.startsWith("/test") || path.startsWith("/login");    
     }
 
 }

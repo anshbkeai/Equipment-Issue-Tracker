@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Part</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
+        
+        <h3 class="text-center mb-4">Add New Part</h3>
+
+        <form th:action="@{/part}" method="post" th:object="${form}">
+
+            <!-- Part Name -->
+            <div class="mb-3">
+                <label class="form-label">Part Name</label>
+                <input type="text" class="form-control" th:field="*{name}" placeholder="Enter part name"  required/>
+            </div>
+
+            <!-- Part Description -->
+            <div class="mb-3">
+                <label class="form-label">Part Description</label>
+                <input type="text" class="form-control" th:field="*{description}" placeholder="Enter description"  />
+            </div>
+
+            <!-- Submit -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    Add Part
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

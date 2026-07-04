@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anshbkeai.issuetracker.core.dto.AuthRequest;
 import com.anshbkeai.issuetracker.core.dto.AuthResponse;
+import com.anshbkeai.issuetracker.core.model.AuthMode;
 import com.anshbkeai.issuetracker.core.service.AppUserAuthService;
 
 import jakarta.validation.Valid;
@@ -25,7 +26,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponse> signup(@RequestBody  @Valid AuthRequest entity) {
         //TODO: process POST request
-        String token = appUserAuthService.signup(entity);
+        String token = appUserAuthService.signup(entity , AuthMode.EMAIL);
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
