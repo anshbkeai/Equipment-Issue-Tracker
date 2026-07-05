@@ -22,6 +22,7 @@ public class WTDocument {
     @Id
     private String documentId;
     private String docUrl;
+    private String documentName;
 
     private LocalDateTime dateCreated;
 

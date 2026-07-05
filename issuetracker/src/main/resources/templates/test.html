@@ -4,83 +4,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Home</title>
 
-    <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/daisyui@5/daisyui.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5/daisyui.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
 <body class="bg-base-200 min-h-screen">
 
-    <div class="navbar bg-base-100 shadow">
+<!-- NAVBAR -->
+<div class="navbar bg-base-100 shadow-md px-6">
 
-        <div class="flex-1">
-            <a class="btn btn-ghost text-xl">
-                📒 Contact Manager
-            </a>
-        </div>
-
-        <div class="flex-none">
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn-ghost">
-                    Logout
-                </button>
-            </form>
-        </div>
-
+    <div class="flex-1">
+        <a class="btn btn-ghost text-xl">
+           Issue Tracker
+        </a>
     </div>
-    <nav>
-        <img th:src="${appUser.profileUrl}" alt="">
-        <span th:text=${appUser.authMode} > </span>
-    </nav>
 
-    <div class="hero min-h-[85vh]">
+    <div class="flex-none flex items-center gap-3">
 
-        <div class="card bg-base-100 shadow-2xl w-96">
+        <!-- PROFILE -->
+        <div class="flex items-center gap-3">
 
-            <div class="card-body items-center text-center">
+            <div class="avatar">
+                <div class="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
 
-                <div class="avatar placeholder">
+                    <!-- PROFILE IMAGE -->
+                    <img th:if="${appUser.profileUrl != null}"
+                         th:src="${appUser.profileUrl}" />
 
-                    <div class="bg-primary text-primary-content rounded-full w-20">
-
-                        <span class="text-3xl">
-                            👤
-                        </span>
-
+                    <!-- FALLBACK -->
+                    <div th:if="${appUser.profileUrl == null}"
+                         class="bg-primary text-primary-content flex items-center justify-center w-10 h-10 rounded-full">
+                        <span>👤</span>
                     </div>
 
                 </div>
+            </div>
 
-                <h2 class="card-title mt-3">
-                    Welcome
-                </h2>
-
-                <h1 class="text-2xl font-bold text-primary"
-                    th:text="${username}">
-                </h1>
-
-                <p class="text-base-content/70">
-                    Glad to see you again.
-                </p>
-
-
-
-                <a href="/logout" class="btn btn-primary mt-4">
-                    Logout
-                </a>
-                 <a href="/dashboard">GO TO DASHBOARD</a>
-
+            <div class="text-sm">
+                <div class="font-semibold" th:text="${username}"></div>
+                <div class="text-xs opacity-70" th:text="${appUser.authMode}"></div>
             </div>
 
         </div>
 
+        <!-- LOGOUT -->
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-sm btn-error">
+                Logout
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div class="flex justify-center mt-10">
+
+    <div class="card w-96 bg-base-100 shadow-xl">
+
+        <div class="card-body items-center text-center">
+
+           
+
+            <h2 class="text-xl font-bold mt-3">
+                Welcome Back
+            </h2>
+
+            <h1 class="text-2xl font-bold text-primary"
+                th:text="${username}">
+            </h1>
+
+            <!-- USER INFO CARD -->
+            <div class="mt-4 w-full">
+
+                <div class="bg-base-200 p-3 rounded-lg text-left">
+
+                    <p class="text-sm opacity-70">Auth Mode</p>
+                    <p class="font-semibold" th:text="${appUser.authMode}"></p>
+
+                </div>
+
+                <div class="bg-base-200 p-3 rounded-lg text-left mt-2">
+
+                    <p class="text-sm opacity-70">Profile</p>
+                    <p class="font-semibold truncate" th:text="${appUser.profileUrl}"></p>
+
+                </div>
+
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="mt-6 flex flex-col gap-2 w-full">
+
+                <a href="/dashboard" class="btn btn-primary w-full">
+                    Go to Dashboard
+                </a>
+
+                <a href="/part" class="btn btn-outline w-full">
+                    View Parts
+                </a>
+
+            </div>
+
+        </div>
     </div>
 
-</body>
+</div>
 
+</body>
 </html>

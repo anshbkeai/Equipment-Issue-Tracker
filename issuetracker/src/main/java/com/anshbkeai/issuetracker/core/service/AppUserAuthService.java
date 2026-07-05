@@ -36,7 +36,7 @@ public class AppUserAuthService {
                 .userId(UUID.randomUUID().toString())
                 .username(authRequest.username())
                 .password(encoder.encode(authRequest.password()))
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .authMode(authMode)
                 .build();
         appUserRepository.save(newUser);

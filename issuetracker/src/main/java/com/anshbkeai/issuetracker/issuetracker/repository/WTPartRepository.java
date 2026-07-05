@@ -7,5 +7,4 @@ import com.anshbkeai.issuetracker.issuetracker.model.WTPart;
 
 @Repository
 public interface WTPartRepository extends JpaRepository<WTPart,String> {
-
 }

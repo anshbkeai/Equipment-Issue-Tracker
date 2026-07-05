@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.anshbkeai.issuetracker.issuetracker.dto.WTPartFrom;
@@ -58,6 +59,19 @@ public class WTPartController {
         
         return "part/createPart";
     }
+    @GetMapping("/info/{id}")
+    public String getMethodName(@PathVariable String id , Model model) {
+        model.addAttribute("part", partService.findbyId(id));
+        return "part/partInfo";
+    }
+    
+    @PostMapping("/delete/{id}")
+    public String deletePart(@PathVariable String id ) {
+        //TODO: process POST request
+        partService.deletePart(id);
+        return "redirect:/part";
+    }
+    
     
     
     

@@ -1,56 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Part</title>
 
-    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             background: #f4f6f9;
         }
+
         .card {
             border: none;
-            border-radius: 15px;
+            border-radius: 14px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .form-wrapper {
+            min-height: 100vh;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+<div class="container d-flex justify-content-center align-items-center form-wrapper">
 
-    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
-        
-        <h3 class="text-center mb-4">Add New Part</h3>
+    <div class="card shadow-sm p-4 w-100" style="max-width: 520px;">
 
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <a href="/part" class="btn btn-outline-secondary btn-sm">
+                ← Back
+            </a>
+
+            <h4 class="mb-0">Add New Part</h4>
+
+            <div></div>
+
+        </div>
+
+        <!-- FORM -->
         <form th:action="@{/part}" method="post" th:object="${form}">
 
             <!-- Part Name -->
             <div class="mb-3">
-                <label class="form-label">Part Name</label>
-                <input type="text" class="form-control" th:field="*{name}" placeholder="Enter part name"  required/>
+                <div class="label">Part Name</div>
+                <input type="text"
+                       class="form-control"
+                       th:field="*{name}"
+                       placeholder="Enter part name"
+                       required>
             </div>
 
             <!-- Part Description -->
             <div class="mb-3">
-                <label class="form-label">Part Description</label>
-                <input type="text" class="form-control" th:field="*{description}" placeholder="Enter description"  />
+                <div class="label">Part Description</div>
+                <input type="text"
+                       class="form-control"
+                       th:field="*{description}"
+                       placeholder="Enter description">
             </div>
 
-            <!-- Submit -->
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    Add Part
+            <!-- BUTTON -->
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary">
+                    + Create Part
                 </button>
             </div>
 
         </form>
 
     </div>
+
 </div>
 
 </body>

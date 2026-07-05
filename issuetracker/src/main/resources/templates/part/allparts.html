@@ -1,65 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parts List</title>
+    <title>Parts Dashboard</title>
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
-            background-color: #f4f6f9;
+            background-color: #f5f7fb;
         }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
         .part-card {
             border: none;
-            border-radius: 12px;
-            transition: 0.2s ease-in-out;
+            border-radius: 14px;
+            transition: all 0.2s ease;
         }
+
         .part-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .muted-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .value {
+            font-weight: 600;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container py-5">
+<!-- TOP NAVBAR -->
+<nav class="navbar topbar px-4 py-3">
+    <div class="d-flex align-items-center gap-3">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Parts List</h2>
-        <a href="/part/create" class="btn btn-primary">
-            + Create Part
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+            ← Dashboard
         </a>
+
+        <h5 class="mb-0 fw-bold">Parts</h5>
     </div>
 
-    <!-- Empty state -->
-    <div th:if="${#lists.isEmpty(parts)}" class="alert alert-warning">
-        No parts available. Click "Create Part" to add one.
+    <a href="/part/create" class="btn btn-primary btn-sm">
+        + Create Part
+    </a>
+</nav>
+
+<div class="container py-4">
+
+    <!-- EMPTY STATE -->
+    <div th:if="${#lists.isEmpty(parts)}"
+         class="alert alert-warning shadow-sm">
+        No parts found. Create your first part to get started.
     </div>
 
-    <!-- Parts grid -->
-    <div class="row g-3">
+    <!-- GRID -->
+    <div class="row g-4">
 
         <div class="col-md-4" th:each="part : ${parts}">
-            <div class="card part-card shadow-sm p-3">
+
+            <div class="card part-card shadow-sm h-100">
 
                 <div class="card-body">
 
-                    <h6 class="text-muted mb-1">Part ID</h6>
-                    <h5 class="fw-bold" th:text="${part.partId}"></h5>
+                    <div class="mb-3">
+                        <div class="muted-label">PART ID</div>
+                        <div class="value" th:text="${part.partId}"></div>
+                    </div>
 
-                    <h6 class="text-muted mt-3 mb-1">Name</h6>
-                    <h5 th:text="${part.partName}"></h5>
+                    <div class="mb-3">
+                        <div class="muted-label">NAME</div>
+                        <div class="value" th:text="${part.partName}"></div>
+                    </div>
 
-                    <h6 class="text-muted mt-3 mb-1">Description</h6>
-                    <p class="mb-0 text-secondary" th:text="${part.partDescription}"></p>
+                    <div class="mb-3">
+                        <div class="muted-label">DESCRIPTION</div>
+                        <div class="text-muted small"
+                             th:text="${part.partDescription}">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- ACTIONS -->
+                    <div class="d-flex justify-content-between">
+
+                        <a th:href="@{'/part/info/' + ${part.partId}}"
+                           class="btn btn-sm btn-outline-dark">
+                            View
+                        </a>
+
+                        <a th:href="@{'/issues/part/' + ${part.partId}}"
+                           class="btn btn-sm btn-primary">
+                            Issues →
+                        </a>
+
+                    </div>
 
                 </div>
 
             </div>
+
         </div>
 
     </div>

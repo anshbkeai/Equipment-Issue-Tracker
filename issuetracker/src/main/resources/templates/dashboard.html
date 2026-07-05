@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Dashboard</title>
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -14,7 +13,7 @@
 
         .card {
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
         }
 
         .stat-card {
@@ -22,7 +21,17 @@
         }
 
         .stat-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .navbar {
+            padding: 12px 20px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -30,10 +39,13 @@
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-light bg-white shadow-sm px-3">
-    <span class="fw-bold">Dashboard</span>
-    <div>
+<nav class="navbar bg-white shadow-sm">
+    <span class="fw-bold fs-5">Issue Tracker Dashboard</span>
+
+    <div class="d-flex gap-2">
         <a href="/part" class="btn btn-primary btn-sm">Parts</a>
+        <a href="/wtdocument/part" class="btn btn-success btn-sm">Documents</a>
+        <a href="/issue" class="btn btn-warning btn-sm">Issues</a>
         <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
     </div>
 </nav>
@@ -42,50 +54,113 @@
 
     <!-- WELCOME -->
     <div class="mb-4">
-        <h3>Welcome, <span class="text-primary" th:text="${username}"></span></h3>
-        <p class="text-muted">Here’s what’s happening today</p>
+        <h3>
+            Welcome, <span class="text-primary" th:text="${username}"></span>
+        </h3>
+        <p class="text-muted">System overview and activity summary</p>
     </div>
 
-    <!-- STATS -->
+    <!-- STATS CARDS -->
     <div class="row g-3 mb-4">
 
+        <!-- PARTS -->
         <div class="col-md-4">
             <div class="card stat-card shadow-sm p-3">
-                <h6 class="text-muted">Total Tasks</h6>
-                <h2 th:text="${tasks.size()}"></h2>
+                <h6 class="text-muted">Total Parts</h6>
+                <h2 class="fw-bold" th:text="${totalParts}">0</h2>
             </div>
         </div>
 
+        <!-- DOCUMENTS -->
         <div class="col-md-4">
             <div class="card stat-card shadow-sm p-3">
-                <h6 class="text-muted">Active User</h6>
-                <h2 th:text="${username}"></h2>
+                <h6 class="text-muted">Total Documents</h6>
+                <h2 class="fw-bold" th:text="${totalDocuments}">0</h2>
             </div>
         </div>
 
+        <!-- ISSUES -->
         <div class="col-md-4">
             <div class="card stat-card shadow-sm p-3">
-                <h6 class="text-muted">System Status</h6>
-                <h2 class="text-success">Online</h2>
+                <h6 class="text-muted">Open Issues</h6>
+                <h2 class="fw-bold text-danger" th:text="${openIssues}">0</h2>
             </div>
         </div>
 
     </div>
 
-    <!-- TASK LIST -->
-    <div class="card shadow-sm p-4">
+    <!-- QUICK ACTIONS -->
+    <div class="card shadow-sm p-4 mb-4">
 
-        <h5 class="mb-3">My Tasks</h5>
+        <h5 class="section-title">Quick Actions</h5>
 
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex justify-content-between align-items-center"
-                th:each="task : ${tasks}">
-                <span th:text="${task}"></span>
-                <span class="badge bg-primary rounded-pill">Task</span>
-            </li>
-        </ul>
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="/part/create" class="btn btn-primary">
+                + Create Part
+            </a>
+
+        </div>
 
     </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="card shadow-sm p-4 mb-4">
+
+    <h5 class="mb-3">📘 Quick Guide</h5>
+
+    <p class="text-muted mb-3">
+        This is an <b>Issue Tracker System</b> designed to manage engineering parts,
+        documents, and issues in one place.
+    </p>
+
+    <div class="row g-3">
+
+        <!-- WHAT IS THIS -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light h-100">
+                <h6>📦 Parts Module</h6>
+                <p class="text-muted mb-0">
+                    Manage all engineering parts with name, description, and metadata.
+                </p>
+            </div>
+        </div>
+
+        <!-- DOCUMENTS -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light h-100">
+                <h6>📄 Documents Module</h6>
+                <p class="text-muted mb-0">
+                    Attach URLs and documentation files to each WT Part for reference.
+                </p>
+            </div>
+        </div>
+
+        <!-- ISSUES -->
+        <div class="col-md-4">
+            <div class="p-3 border rounded bg-light h-100">
+                <h6>🐞 Issue Tracker</h6>
+                <p class="text-muted mb-0">
+                    Log and track system or product issues linked to specific parts.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FLOW -->
+    <hr class="my-4">
+
+    <h6>🔁 System Flow</h6>
+
+    <ol class="text-muted mb-0">
+        <li>Create a <b>Part</b></li>
+        <li>Attach <b>Documents</b> to Part</li>
+        <li>Report <b>Issues</b> for Parts</li>
+        <li>Track everything from Dashboard</li>
+    </ol>
+
+</div>
 
 </div>
 
